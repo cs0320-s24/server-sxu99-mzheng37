@@ -1,6 +1,6 @@
 package edu.brown.cs.student.main;
 
-import Search.Search;
+import CSV.Parser.Search;
 import java.io.IOException;
 
 /** The Main class of our project. This is where execution begins. */

@@ -1,7 +1,6 @@
-package Search;
+package CSV.Parser;
 
-import CreatorFromRowObjects.StringListCreator;
-import Parser.CSVParser;
+import CSV.Parser.CreatorFromRowObjects.StringListCreator;
 import edu.brown.cs.student.main.FactoryFailureException;
 import java.io.FileReader;
 import java.io.IOException;

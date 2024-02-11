@@ -1,4 +1,4 @@
-package CreatorFromRowObjects.Star;
+package CSV.Parser.CreatorFromRowObjects.Star;
 
 /** Class for a star object */
 public class Star {

@@ -1,4 +1,4 @@
-package Parser;
+package CSV.Parser;
 
 import edu.brown.cs.student.main.CreatorFromRow;
 import edu.brown.cs.student.main.FactoryFailureException;
