@@ -1,4 +1,4 @@
-package CreatorFromRowObjects.Star;
+package CSV.Parser.CreatorFromRowObjects.Star;
 
 import edu.brown.cs.student.main.CreatorFromRow;
 import edu.brown.cs.student.main.FactoryFailureException;

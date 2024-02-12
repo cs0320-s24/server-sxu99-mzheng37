@@ -3,14 +3,13 @@ package edu.brown.cs.student;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.testng.AssertJUnit.assertEquals;
 
-import CreatorFromRowObjects.Star.Star;
-import CreatorFromRowObjects.Star.StarObjCreator;
-import CreatorFromRowObjects.StringListCreator;
-import Parser.CSVParser;
+import CSV.Parser.CreatorFromRowObjects.Star.Star;
+import CSV.Parser.CreatorFromRowObjects.Star.StarObjCreator;
+import CSV.Parser.CreatorFromRowObjects.StringListCreator;
+import CSV.Parser.CSVParser;
 import edu.brown.cs.student.main.FactoryFailureException;
 import java.io.*;
 import java.util.List;
-import javax.swing.*;
 import org.junit.jupiter.api.Test;
 
 /** Test the Parser class */

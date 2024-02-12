@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testng.AssertJUnit.assertEquals;
 
-import Search.Search;
+import CSV.Parser.Search;
 import edu.brown.cs.student.main.FactoryFailureException;
 import java.io.IOException;
 import java.util.ArrayList;
