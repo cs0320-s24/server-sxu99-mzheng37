@@ -27,17 +27,10 @@ public class LoadCSVHandler {
     LoadCSVHandler.loadCSVState = loadCSVState;
   }
 
-  public record LoadCSVResponse(String response_type, Map<String, Object> responseMap) {
-    public LoadCSVResponse(Map<String, Object> responseMap) {
-      this("success", responseMap);
-    }
-
   public Object handle(Request request, Response response)
       throws IOException, FactoryFailureException {
-    Moshi moshi = new Builder().build();
-    JsonAdapter<SoupSuccessResponse> adapter = moshi.adapter(SoupSuccessResponse.class);
-    Map<String, Object> responseMap = new HashMap<>();
 
+    Map<String, Object> responseMap = new HashMap<>();
     // get file name to load 
     String fileName = request.queryParams("fileName");
     String hasHeader = request.queryParams("hasHeader");
@@ -52,7 +45,7 @@ public class LoadCSVHandler {
       parser.parse();
       loadCSVState = true;
       responseMap.put("result", "success");
-      return adapter.toJson(responseMap);
+      return new LoadCSVResponse(responseMap).serialize();
     } catch (FactoryFailureException | IOException e){
       loadCSVState = false;
       responseMap.put("result", e.getMessage());
@@ -60,6 +53,28 @@ public class LoadCSVHandler {
     }
 
 
+    public record LoadCSVResponse (String response_type, Map<String, Object> responseMap) {
+      public LoadCSVResponse(Map<String, Object> responseMap) {
+        this("success", responseMap);
+      }
+      /**
+       * @return this response, serialized as Json
+       */
+      String serialize() {
+        try {
+          // Initialize Moshi which takes in this class and returns it as JSON!
+          Moshi moshi = new Moshi.Builder().build();
+          JsonAdapter<LoadCSVResponse> adapter = moshi.adapter(LoadCSVResponse.class);
+          return adapter.toJson(this);
+        } catch (Exception e) {
+          // For debugging purposes, show in the console _why_ this fails
+          // Otherwise we'll just get an error 500 from the API in integration
+          // testing.
+          e.printStackTrace();
+          throw e;
+        }
+      }
+    }
 
 
 
