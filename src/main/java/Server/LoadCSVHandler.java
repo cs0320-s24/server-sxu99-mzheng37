@@ -16,10 +16,12 @@ import spark.Response;
 import spark.Route;
 
 public class LoadCSVHandler implements Route {
-  private final List<List<String>> loadedcsv;
+  private List<List<String>> loadedcsv;
+  private List<String> loadedFileName;
 
-  public LoadCSVHandler(List<List<String>> loadedcsv) {
+  public LoadCSVHandler(List<String> fileName, List<List<String>> loadedcsv) {
     this.loadedcsv = loadedcsv;
+    this.loadedFileName = fileName;
   }
 
   @Override
@@ -34,7 +36,6 @@ public class LoadCSVHandler implements Route {
       return new CSVParsingFailureResponse("error_datasource", responseMap).serialize();
     }
 
-    System.out.println(fileName);
     Reader fileReader;
     try {
       fileReader = new FileReader("data/" + fileName);
@@ -49,17 +50,20 @@ public class LoadCSVHandler implements Route {
       CSVParser<List<String>> parser = new CSVParser<>(fileReader, new StringListCreator(), false);
       parser.parse();
       csvjson = parser.getParseResult();
+      this.loadedcsv.clear();
       this.loadedcsv.addAll(csvjson);
-      responseMap.put("success loading file: ", fileName);
+      this.loadedFileName.clear();
+      this.loadedFileName.add(fileName);
+      System.out.println(loadedFileName);
+      responseMap.put("success loading file: ", "data/" + fileName);
       return new CSVParsingSuccessResponse(responseMap).serialize();
     } catch (FactoryFailureException e) {
-      responseMap.put("Parsing file failed: ", fileName);
+      responseMap.put("Parsing file failed: ", "data/" + fileName);
       return new CSVParsingFailureResponse("error", responseMap).serialize();
     }
   }
 
-  public record CSVParsingFailureResponse(String responseType, Map<String, Object> responseMap) {
-
+  public record CSVParsingFailureResponse(String responseType, Map<String, Object> filePath) {
     String serialize() {
       try{
         Moshi moshi = new Moshi.Builder().build();
@@ -73,7 +77,7 @@ public class LoadCSVHandler implements Route {
     }
   }
 
-  public record CSVParsingSuccessResponse(String response_type, Map<String, Object> responseMap) {
+  public record CSVParsingSuccessResponse(String response_type, Map<String, Object> filePath) {
     public CSVParsingSuccessResponse(Map<String, Object> responseMap) {
       this("success", responseMap); }
 

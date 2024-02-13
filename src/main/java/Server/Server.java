@@ -11,12 +11,14 @@ import spark.Spark;
 public class Server {
   private static final int port = 3232;
   private final DataSource dataSourceToUSe;
+  private static List<String> CSVLoadfileName;
   private static List<List<String>> CSVLoadState;
 
   public Server(DataSource dataSourceToUSe) {
     Spark.port(port);
     this.dataSourceToUSe = dataSourceToUSe;
     CSVLoadState = new ArrayList<>();
+    CSVLoadfileName = new ArrayList<>();
 
     // TODO: ask about how set the methods and origin to more specific
     after(
@@ -27,9 +29,8 @@ public class Server {
 
     // create a handler, every end-point has a specific handler -- these methods will handle,
     // pack-up JSON response, and send back to suer
-    Spark.get("/load", new LoadCSVHandler(CSVLoadState));
-    System.out.println("HI" + CSVLoadState);
-    //Spark.get("/view", new ViewCSVHandler(CSVLoadState));
+    Spark.get("/load", new LoadCSVHandler(CSVLoadfileName, CSVLoadState));
+    Spark.get("/view", new ViewCSVHandler(CSVLoadfileName, CSVLoadState));
     // Spark.get("/search", new SearchCSVHandler(CSVLoadState));
 
     // if broadband end-point needs the census data, create ACSDataSource and obtain data
