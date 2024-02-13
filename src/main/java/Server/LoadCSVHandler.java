@@ -1,105 +1,92 @@
-  package Server;
+package Server;
 
-  import CSV.Parser.CSVParser;
-  import CSV.Parser.CreatorFromRowObjects.StringListCreator;
-  import CSV.Parser.Search;
-  import com.squareup.moshi.JsonAdapter;
-  import com.squareup.moshi.Moshi;
-  import com.squareup.moshi.Moshi.Builder;
-  import com.squareup.moshi.Types;
-  import edu.brown.cs.student.main.FactoryFailureException;
-  import java.io.FileReader;
-  import java.io.IOException;
-  import java.io.Reader;
-  import java.lang.reflect.Type;
-  import java.util.*;
-  import spark.Request;
-  import spark.Response;
-  import spark.Route;
+import CSV.Parser.CSVParser;
+import CSV.Parser.CreatorFromRowObjects.StringListCreator;
+import com.squareup.moshi.Json;
+import com.squareup.moshi.JsonAdapter;
+import com.squareup.moshi.Moshi;
+import edu.brown.cs.student.main.FactoryFailureException;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.Reader;
+import java.security.PublicKey;
+import java.util.*;
+import spark.Request;
+import spark.Response;
+import spark.Route;
 
-  public class LoadCSVHandler implements Route {
-    public Set<List<List<String>>> loadedcsv;
-    //public static boolean loadCSVState;
+public class LoadCSVHandler implements Route {
+  private final List<List<String>> loadedcsv;
 
-    public LoadCSVHandler(Set<List<List<String>>> loadedcsv) {
-      //LoadCSVHandler.loadCSVState = loadCSVState;
-      this.loadedcsv = loadedcsv;
+  public LoadCSVHandler(List<List<String>> loadedcsv) {
+    this.loadedcsv = loadedcsv;
+  }
+
+  @Override
+  public Object handle(Request request, Response response) throws Exception {
+    String fileName = request.queryParams("fileName");
+    // String hasHeader = request.queryParams("hasHeader");
+
+    Map<String, Object> responseMap = new HashMap<>();
+    if (fileName.isEmpty()) {
+      // no filepath query
+      responseMap.put("No file name inputted as parameter", "");
+      return new CSVParsingFailureResponse("error_datasource", responseMap).serialize();
     }
 
-    @Override
-    public Object handle(Request request, Response response) throws Exception {
-      String fileName = request.queryParams("fileName");
-      String hasHeader = request.queryParams("hasHeader");
+    System.out.println(fileName);
+    Reader fileReader;
+    try {
+      fileReader = new FileReader("data/" + fileName);
+    } catch (FileNotFoundException e) {
+      // parse failure
+      responseMap.put("File is not found: ", fileName);
+      return new CSVParsingFailureResponse("error_datasource", responseMap).serialize();
+    }
 
-      if (fileName == null) {
-        // no filepath query
-        return new MissingFilePathResponse().serialize();
-      }
-      System.out.println(fileName);
-      Reader fileReader;
-      try {
-        fileReader = new FileReader("data/" + fileName);
+    List<List<String>> csvjson;
+    try {
+      CSVParser<List<String>> parser = new CSVParser<>(fileReader, new StringListCreator(), false);
+      parser.parse();
+      csvjson = parser.getParseResult();
+      this.loadedcsv.addAll(csvjson);
+      responseMap.put("success loading file: ", fileName);
+      return new CSVParsingSuccessResponse(responseMap).serialize();
+    } catch (FactoryFailureException e) {
+      responseMap.put("Parsing file failed: ", fileName);
+      return new CSVParsingFailureResponse("error", responseMap).serialize();
+    }
+  }
+
+  public record CSVParsingFailureResponse(String responseType, Map<String, Object> responseMap) {
+
+    String serialize() {
+      try{
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<CSVParsingFailureResponse> adapter = moshi.adapter(CSVParsingFailureResponse.class);
+        return adapter.toJson(this);
       } catch (Exception e) {
-        // parse failure
-        return new InaccessibleCSVResponse(fileName).serialize();
+        e.printStackTrace();
+        throw e;
       }
-      CSVParser<List<String>> parser = new CSVParser<>(fileReader, new StringListCreator(), hasHeader.equals("true"));
-      List<List<String>> csvjson;
+
+    }
+  }
+
+  public record CSVParsingSuccessResponse(String response_type, Map<String, Object> responseMap) {
+    public CSVParsingSuccessResponse(Map<String, Object> responseMap) {
+      this("success", responseMap); }
+
+    String serialize() {
       try {
-        csvjson = parser.getParseResult(); //Not sure if this is the correct implementation of your parse function
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<CSVParsingSuccessResponse> adapter = moshi.adapter(CSVParsingSuccessResponse.class);
+        return adapter.toJson(this);
       } catch (Exception e) {
-        // parse failure
-        return new CSVParsingFailureResponse(fileName).serialize();
-      }
-      this.loadedcsv.add(csvjson);
-      // parse success
-      return new CSVParsingSuccessResponse(fileName).serialize();
-    }
-
-    public record InaccessibleCSVResponse(String result, String filepath, String message) {
-      public InaccessibleCSVResponse(String filepath) {
-        this("error_datasource", filepath, "File '" + filepath + "'doesn't exist. ");
-      }
-      String serialize() {
-        Moshi moshi = new Moshi.Builder().build();
-        return moshi.adapter(InaccessibleCSVResponse.class).toJson(this);
-      }
-    }
-
-    public record MissingFilePathResponse(String result, String message) {
-      public MissingFilePathResponse() {
-        this("error_bad_request", "Missing filepath query.");
-      }
-      String serialize() {
-        Moshi moshi = new Moshi.Builder().build();
-        return moshi.adapter(MissingFilePathResponse.class).toJson(this);
-      }
-    }
-
-    public record CSVParsingFailureResponse(String result, String filepath, String message) {
-      public CSVParsingFailureResponse(String filepath) {
-        this("error_datasource", filepath, "Error parsing" + filepath);
-      }
-      String serialize() {
-        Moshi moshi = new Moshi.Builder().build();
-        return moshi.adapter(CSVParsingFailureResponse.class).toJson(this);
-      }
-    }
-
-    public record CSVParsingSuccessResponse(String result, String filepath, String message) {
-      public CSVParsingSuccessResponse(String filepath) {
-        this("success", filepath, "CSV File'" + filepath + "' successfully stored. " +
-                "Contents accessible in endpoint viewcsv");
-      }
-      String serialize() {
-        try {
-          Moshi moshi = new Moshi.Builder().build();
-          return moshi.adapter(CSVParsingSuccessResponse.class).toJson(this);
-        } catch (Exception e) {
-          // internal error
-          e.printStackTrace();
-          throw e;
-        }
+        // internal error
+        e.printStackTrace();
+        throw e;
       }
     }
   }
+}

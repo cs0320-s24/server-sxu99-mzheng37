@@ -1,5 +1,3 @@
 package Server;
 
-public class SearchCSVHandler {
-
-}
+public class SearchCSVHandler {}

@@ -3,10 +3,10 @@ package edu.brown.cs.student;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.testng.AssertJUnit.assertEquals;
 
+import CSV.Parser.CSVParser;
 import CSV.Parser.CreatorFromRowObjects.Star.Star;
 import CSV.Parser.CreatorFromRowObjects.Star.StarObjCreator;
 import CSV.Parser.CreatorFromRowObjects.StringListCreator;
-import CSV.Parser.CSVParser;
 import edu.brown.cs.student.main.FactoryFailureException;
 import java.io.*;
 import java.util.List;
