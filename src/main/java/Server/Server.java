@@ -31,7 +31,7 @@ public class Server {
     // pack-up JSON response, and send back to suer
     Spark.get("/load", new LoadCSVHandler(CSVLoadfileName, CSVLoadState));
     Spark.get("/view", new ViewCSVHandler(CSVLoadfileName, CSVLoadState));
-    // Spark.get("/search", new SearchCSVHandler(CSVLoadState));
+    Spark.get("/search", new SearchCSVHandler(CSVLoadfileName, CSVLoadState));
 
     // if broadband end-point needs the census data, create ACSDataSource and obtain data
 

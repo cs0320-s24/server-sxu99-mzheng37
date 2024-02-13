@@ -28,7 +28,7 @@ public class ViewCSVHandler implements Route {
     }
 
     try {
-      responseMap.put(loadedFileName.get(0), loadedCSV);
+      responseMap.put("data/" + loadedFileName.get(0), loadedCSV);
       return new CSVViewSuccessResponse(responseMap).serialize();
     } catch (Exception e) {
       responseMap.put("failed to view loaded CSV", null);
