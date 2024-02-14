@@ -45,7 +45,9 @@ public class Search {
   }
 
   /**
-   * Constructor used when parsing is not required (Already parsed into list of string holding header and list of string holding body content)
+   * Constructor used when parsing is not required (Already parsed into list of string holding
+   * header and list of string holding body content)
+   *
    * @param headerList a list of string containing header values
    * @param cvsBodyList a list containing main body rows in list of string format
    */

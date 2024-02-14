@@ -34,15 +34,13 @@ public class ViewCSVHandler implements Route {
       responseMap.put("failed to view loaded CSV", null);
       return new CSVViewFailureResponse("error", responseMap).serialize();
     }
-
   }
 
   public record CSVViewFailureResponse(String responseType, Map<String, Object> data) {
     String serialize() {
-      try{
+      try {
         Moshi moshi = new Moshi.Builder().build();
-        JsonAdapter<CSVViewFailureResponse> adapter = moshi.adapter(
-            CSVViewFailureResponse.class);
+        JsonAdapter<CSVViewFailureResponse> adapter = moshi.adapter(CSVViewFailureResponse.class);
         return adapter.toJson(this);
       } catch (Exception e) {
         e.printStackTrace();
@@ -51,21 +49,21 @@ public class ViewCSVHandler implements Route {
     }
   }
 
-public record CSVViewSuccessResponse(String response_type, Map<String, Object> data) {
-  public CSVViewSuccessResponse(Map<String, Object> responseMap) {
-    this("success", responseMap); }
+  public record CSVViewSuccessResponse(String response_type, Map<String, Object> data) {
+    public CSVViewSuccessResponse(Map<String, Object> responseMap) {
+      this("success", responseMap);
+    }
 
-  String serialize() {
-    try {
-      Moshi moshi = new Moshi.Builder().build();
-      JsonAdapter<CSVViewSuccessResponse> adapter = moshi.adapter(
-          CSVViewSuccessResponse.class);
-      return adapter.toJson(this);
-    } catch (Exception e) {
-      // internal error
-      e.printStackTrace();
-      throw e;
+    String serialize() {
+      try {
+        Moshi moshi = new Moshi.Builder().build();
+        JsonAdapter<CSVViewSuccessResponse> adapter = moshi.adapter(CSVViewSuccessResponse.class);
+        return adapter.toJson(this);
+      } catch (Exception e) {
+        // internal error
+        e.printStackTrace();
+        throw e;
+      }
     }
   }
-}
 }
