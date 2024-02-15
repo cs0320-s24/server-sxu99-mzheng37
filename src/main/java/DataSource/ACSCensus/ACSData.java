@@ -22,7 +22,7 @@ public class ACSData implements ACSDataSource {
 
   public StateCodeResponse getStateCode() throws DataSourceException, IOException, IllegalArgumentException, NullPointerException {
       // https://api.census.gov/data/2010/dec/sf1?get=NAME&for=state:*
-      URL requestURL = new URL("https", "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=state");
+      URL requestURL = new URL("https", "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=state"+"&key=ffd0a44272cacda9ab56251cb0876d5277c34902");
       List<List<String>> body = queryAndDeserialize(requestURL);
       if (body == null) {
         throw new NullPointerException("Failed to get state code because query returned null");
@@ -56,7 +56,7 @@ public class ACSData implements ACSDataSource {
       throws IllegalArgumentException, DataSourceException, IOException {
     // https://api.census.gov/data/2021/acs/acs1/subject/variables?get=NAME,S2802_C03_022E&for=county:*&in=state:06
     System.out.println(countyCode + " " + stateCode);
-    URL requestURL = new URL("https", "api.census.gov", "/data/2021/acs/acs1/subject/variables?get=NAME,S2802_C03_022E&for=county:"+countyCode+"&in=state:"+stateCode);
+    URL requestURL = new URL("https", "api.census.gov", "/data/2021/acs/acs1/subject/variables?get=NAME,S2802_C03_022E&for=county:"+countyCode+"&in=state:"+stateCode+"&key=ffd0a44272cacda9ab56251cb0876d5277c34902");
     List<List<String>> body = queryAndDeserialize(requestURL);
     System.out.println(body);
     System.out.println(body.get(1).get(1));
