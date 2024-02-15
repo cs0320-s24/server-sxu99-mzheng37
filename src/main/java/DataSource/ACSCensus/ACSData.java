@@ -34,8 +34,8 @@ public class ACSData implements ACSDataSource {
   public CountyCodeResponse getCountyCode(String stateCode)
       throws IllegalArgumentException, DataSourceException, IOException, NullPointerException {
     // https://api.census.gov/data/2010/dec/sf1?get=NAME&for=county:*&in=state:06
-    if (stateCode == null) {
-      throw new IllegalArgumentException("State Code is null, fail to get county code");
+    if (stateCode == null || stateCode.isEmpty()) {
+      throw new IllegalArgumentException("State Code is null or empty, fail to get county code");
     }
     URL requestURL = new URL("https", "api.census.gov", "/data/2010/dec/sf1?get=NAME&for=county:*&in=state:"+stateCode+"&key=ffd0a44272cacda9ab56251cb0876d5277c34902");
     List<List<String>> body = queryAndDeserialize(requestURL);
@@ -51,13 +51,12 @@ public class ACSData implements ACSDataSource {
 
   public BroadBandInfo getBroadBandInfo(String stateCode, String countyCode)
       throws IllegalArgumentException, DataSourceException, IOException {
+    if (stateCode == null || countyCode == null || stateCode.isEmpty() || countyCode.isEmpty()) {
+      throw new IllegalArgumentException("State Code or County Code is null or empty, fail to get broadband data");
+    }
     // https://api.census.gov/data/2021/acs/acs1/subject/variables?get=NAME,S2802_C03_022E&for=county:*&in=state:06
-    System.out.println(countyCode + " " + stateCode);
     URL requestURL = new URL("https", "api.census.gov", "/data/2021/acs/acs1/subject/variables?get=NAME,S2802_C03_022E&for=county:"+countyCode+"&in=state:"+stateCode+"&key=ffd0a44272cacda9ab56251cb0876d5277c34902");
     List<List<String>> body = queryAndDeserialize(requestURL);
-    System.out.println(body);
-    System.out.println(body.get(1).get(1));
-
     return new BroadBandInfo(Double.parseDouble(body.get(1).get(1)));
   }
 
