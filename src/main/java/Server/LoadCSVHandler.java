@@ -2,19 +2,18 @@ package Server;
 
 import CSV.Parser.CSVParser;
 import CSV.Parser.CreatorFromRowObjects.StringListCreator;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
+import Server.Serializer.FailureResponse;
+import Server.Serializer.SuccessResponse;
 import edu.brown.cs.student.main.FactoryFailureException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
-import java.io.Serial;
 import java.util.*;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
-public class LoadCSVHandler extends Serialize implements Route {
+public class LoadCSVHandler implements Route {
 
   private List<List<String>> loadedcsv;
   private List<String> loadedFileName;
@@ -33,7 +32,7 @@ public class LoadCSVHandler extends Serialize implements Route {
       String fileName = request.queryParams("fileName");
       if (fileName.isEmpty()) {
         responseMap.put("No file name inputted as parameter, please input fileName=your file", "");
-        return new Serialize.CSVFailureResponse("error_bad_request", responseMap).serialize();
+        return new FailureResponse("error_bad_request", responseMap).serialize();
       }
 
       Reader fileReader;
@@ -42,7 +41,7 @@ public class LoadCSVHandler extends Serialize implements Route {
       } catch (FileNotFoundException e) {
         // parsing failure
         responseMap.put("File is not found: ", "data/" + fileName);
-        return new Serialize.CSVFailureResponse("error_datasource", responseMap).serialize();
+        return new FailureResponse("error_datasource", responseMap).serialize();
       }
 
       List<List<String>> csvjson;
@@ -57,14 +56,14 @@ public class LoadCSVHandler extends Serialize implements Route {
         this.loadedFileName.add(fileName);
         System.out.println(loadedFileName);
         responseMap.put("success loading file: ", "data/" + fileName);
-        return new Serialize.CSVSuccessResponse(responseMap).serialize();
+        return new SuccessResponse(responseMap).serialize();
       } catch (FactoryFailureException e) {
         responseMap.put("Parsing file failed: ", "data/" + fileName);
-        return new Serialize.CSVFailureResponse("error", responseMap).serialize();
+        return new FailureResponse("error", responseMap).serialize();
       }
     } catch (Exception e) {
       responseMap.put("Cannot initiate load calls, please provide parameters like fileName=your file", "");
-      return new Serialize.CSVFailureResponse("error_bad_json", responseMap).serialize();
+      return new FailureResponse("error_bad_json", responseMap).serialize();
     }
 
   }

@@ -1,6 +1,6 @@
-package CSV.Parser.CreatorFromRowObjects.Star;
+package CSV.Parser.CreatorFromRowObjects;
 
-import edu.brown.cs.student.main.CreatorFromRow;
+import CSV.Parser.Star.Star;
 import edu.brown.cs.student.main.FactoryFailureException;
 import java.util.List;
 

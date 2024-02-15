@@ -1,15 +1,14 @@
 package Server;
 
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
+import Server.Serializer.FailureResponse;
+import Server.Serializer.SuccessResponse;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import spark.Request;
 import spark.Response;
 import spark.Route;
 
-public class ViewCSVHandler extends Serialize implements Route {
+public class ViewCSVHandler implements Route {
   private List<List<String>> loadedCSV;
   private List<String> loadedFileName;
 
@@ -25,19 +24,19 @@ public class ViewCSVHandler extends Serialize implements Route {
     try {
       if (loadedFileName.isEmpty()) {
         responseMap.put("No file loaded successfully, please load a file to view", "");
-        return new Serialize.CSVFailureResponse("error_datasource", responseMap).serialize();
+        return new FailureResponse("error_datasource", responseMap).serialize();
       }
 
       try {
         responseMap.put("data/" + loadedFileName.get(0), loadedCSV);
-        return new Serialize.CSVSuccessResponse(responseMap).serialize();
+        return new SuccessResponse(responseMap).serialize();
       } catch (Exception e) {
         responseMap.put("failed to view loaded CSV", null);
-        return new Serialize.CSVFailureResponse("error", responseMap).serialize();
+        return new FailureResponse("error", responseMap).serialize();
       }
     } catch (Exception e) {
       responseMap.put("Cannot initiate view calls", "");
-      return new Serialize.CSVFailureResponse("error_bad_json", responseMap);
+      return new FailureResponse("error_bad_json", responseMap).serialize();
     }
 
   }}

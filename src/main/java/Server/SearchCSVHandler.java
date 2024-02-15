@@ -1,8 +1,8 @@
 package Server;
 
 import CSV.Parser.Search;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
+import Server.Serializer.FailureResponse;
+import Server.Serializer.SuccessResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +11,7 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
-public class SearchCSVHandler extends Serialize implements Route {
+public class SearchCSVHandler implements Route {
 
   private List<List<String>> loadedcsv;
   private List<String> loadedFileName;
@@ -36,7 +36,7 @@ public class SearchCSVHandler extends Serialize implements Route {
         responseMap.put(
             "Not all search parameters has values",
             "parameters are hasHeader (true/false), col(true/false), colID(colIndex or colName), item (value to search for)");
-        return new Serialize.CSVFailureResponse("error_bad_request", responseMap).serialize();
+        return new FailureResponse("error_bad_request", responseMap).serialize();
       }
 
       // create search object
@@ -82,7 +82,7 @@ public class SearchCSVHandler extends Serialize implements Route {
                       + columnInt,
                   row);
             }
-            return new Serialize.CSVSuccessResponse(responseMap).serialize();
+            return new SuccessResponse(responseMap).serialize();
           } catch (ArrayIndexOutOfBoundsException m) {
             responseMap.put(
                 "searching "
@@ -97,7 +97,7 @@ public class SearchCSVHandler extends Serialize implements Route {
                     + 0
                     + " and upper bound "
                     + loadedcsv.get(0).size());
-            return new Serialize.CSVFailureResponse("error", responseMap).serialize();
+            return new FailureResponse("error", responseMap).serialize();
           }
         } catch (NumberFormatException e) {
           // search with column name (parsing int failed)
@@ -110,7 +110,7 @@ public class SearchCSVHandler extends Serialize implements Route {
                     + " under column name "
                     + colId,
                 "header need to be true to search with header name");
-            return new Serialize.CSVFailureResponse("error", responseMap).serialize();
+            return new FailureResponse("error", responseMap).serialize();
           } else {
             row.addAll(search.startSearch(itemToSearch, colId));
             if (row.isEmpty()) {
@@ -132,7 +132,7 @@ public class SearchCSVHandler extends Serialize implements Route {
                       + colId,
                   row);
             }
-            return new Serialize.CSVSuccessResponse(responseMap).serialize();
+            return new SuccessResponse(responseMap).serialize();
           }
         }
       } else {
@@ -145,11 +145,11 @@ public class SearchCSVHandler extends Serialize implements Route {
           responseMap.put(
               "searching " + itemToSearch + " in entire file " + loadedFileName.get(0), row);
         }
-        return new Serialize.CSVSuccessResponse(responseMap).serialize();
+        return new SuccessResponse(responseMap).serialize();
       }
     } catch (Exception e) {
       responseMap.put("Cannot initiate search calls, please provide parameters", "");
-      return new Serialize.CSVFailureResponse("error_bad_json", responseMap);
+      return new FailureResponse("error_bad_json", responseMap).serialize();
     }
   }
 }

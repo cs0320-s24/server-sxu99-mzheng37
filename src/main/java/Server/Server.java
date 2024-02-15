@@ -9,7 +9,7 @@ import java.util.List;
 import spark.Spark;
 
 public class Server {
-  private static final int port = 3232;
+  private static final int port = 3231;
   private final ACSDataSource dataSourceToUSe;
   private static List<String> CSVLoadfileName;
   private static List<List<String>> CSVLoadState;
@@ -33,7 +33,9 @@ public class Server {
           + " * /search: search a value and obtain the row it was found in; provide header (true / false), col (true / false), colId (column index or column name), item (value to search for) \n"
           + "NOTE: a file must be loaded in to be searched \n"
           + "Ex: /search?header=false&col=true&colId=1&item=Annie \n \n"
-          + " * /broadBand: provide a state and county to receive information about its broadband; ";
+          + " * /broadband: provide a state and county to receive information about its broadband; "
+          + "NOTE: State and County name must be capitalized for the first letter+"
+          + "Ex: /broadband?state=Minnesota?county=Hennepin";
     });
 
     after(

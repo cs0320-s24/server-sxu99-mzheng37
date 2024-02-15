@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.testng.AssertJUnit.assertEquals;
 
 import CSV.Parser.CSVParser;
-import CSV.Parser.CreatorFromRowObjects.Star.Star;
-import CSV.Parser.CreatorFromRowObjects.Star.StarObjCreator;
+import CSV.Parser.Star.Star;
+import CSV.Parser.CreatorFromRowObjects.StarObjCreator;
 import CSV.Parser.CreatorFromRowObjects.StringListCreator;
 import edu.brown.cs.student.main.FactoryFailureException;
 import java.io.*;
