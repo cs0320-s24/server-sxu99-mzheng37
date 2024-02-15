@@ -1,8 +1,7 @@
-package Server.Serializer;
+package Handler.Serializer;
 
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
-import com.squareup.moshi.Moshi.Builder;
 import java.util.Map;
 
 public record SuccessResponse(String response_type, Map<String, Object> data) {

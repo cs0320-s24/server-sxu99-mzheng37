@@ -1,18 +1,17 @@
-package Server;
+package Handler;
 
 import DataSource.ACSCensus.ACSData.CountyCodeResponse;
 import DataSource.ACSCensus.ACSData.StateCodeResponse;
 import DataSource.ACSCensus.ACSDataSource;
 import DataSource.ACSCensus.BroadBandInfo;
 import DataSource.DatasourceException.DataSourceException;
-import Server.Serializer.FailureResponse;
-import Server.Serializer.SuccessResponse;
+import Handler.Serializer.FailureResponse;
+import Handler.Serializer.SuccessResponse;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
-import javax.xml.crypto.Data;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -46,6 +45,7 @@ public class BroadBandHandler implements Route {
           stateCode = stateCodeMap.stateCodes().get(state);
         } else {
           responseMap.put("State code not found with given state parameter (please check first letter of state is capitalized)", "");
+          responseMap.put("Given State", state);
           return new FailureResponse("error", responseMap).serialize();
         }
         countyCodeMap = source.getCountyCode(stateCode);
@@ -53,6 +53,7 @@ public class BroadBandHandler implements Route {
           countyCode = countyCodeMap.countyCodes().get(county + " County, " + state);
         } else {
           responseMap.put("County code not found with given state code and county parameter (please check first letter of county is capitalized)", "");
+          responseMap.put("Given County", county);
           return new FailureResponse("error", responseMap).serialize();
         }
       } catch (IllegalArgumentException | NullPointerException e) {

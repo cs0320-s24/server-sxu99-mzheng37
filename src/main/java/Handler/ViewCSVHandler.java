@@ -1,7 +1,7 @@
-package Server;
+package Handler;
 
-import Server.Serializer.FailureResponse;
-import Server.Serializer.SuccessResponse;
+import Handler.Serializer.FailureResponse;
+import Handler.Serializer.SuccessResponse;
 import java.util.HashMap;
 import java.util.List;
 import spark.Request;
@@ -35,7 +35,7 @@ public class ViewCSVHandler implements Route {
         return new FailureResponse("error", responseMap).serialize();
       }
     } catch (Exception e) {
-      responseMap.put("Cannot initiate view calls; please enter no parameter", "");
+      responseMap.put("Cannot initiate view calls", "");
       return new FailureResponse("error_bad_json", responseMap).serialize();
     }
 

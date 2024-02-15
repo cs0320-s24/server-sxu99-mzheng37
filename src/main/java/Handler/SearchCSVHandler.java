@@ -1,8 +1,8 @@
-package Server;
+package Handler;
 
 import CSV.Parser.Search;
-import Server.Serializer.FailureResponse;
-import Server.Serializer.SuccessResponse;
+import Handler.Serializer.FailureResponse;
+import Handler.Serializer.SuccessResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +35,7 @@ public class SearchCSVHandler implements Route {
       if (hasHeader.isEmpty() || useColId.isEmpty() || colId.isEmpty() || itemToSearch.isEmpty()) {
         responseMap.put(
             "Not all search parameters has values",
-            "parameters are hasHeader (true/false), col(true/false), colId(colIndex or colName), item(value to search for)");
+            "parameters are hasHeader (true/false), col(true/false), colId(colIndex or colName, NA if not needed), item(value to search for)");
         return new FailureResponse("error_bad_request", responseMap).serialize();
       }
 
@@ -113,8 +113,31 @@ public class SearchCSVHandler implements Route {
                     + " under column name "
                     + colId,
                 "header need to be true to search with header name");
+            responseMap.put("Please ensure that header parameter is true", "");
             return new FailureResponse("error", responseMap).serialize();
           } else {
+            // check that given header is found in header list, provide available header list if not
+            boolean headerExist = false;
+            if (headerList.isEmpty()) {
+              responseMap.put("Header list is empty", "Ensure that your CSV has a header to use this search (first row)");
+              return new FailureResponse("error", responseMap);
+            }
+            for (String header : headerList) {
+              if (header.equals(colId)) {
+                headerExist = true;
+                break;
+              }
+            }
+            if(!headerExist) {
+              responseMap.put("searching "
+                  + itemToSearch
+                  + " in file "
+                  + loadedFileName.get(0)
+                  + " under column name "
+                  + colId, "Header given doesn't exists");
+              responseMap.put("Here are the available headers", headerList);
+              return new FailureResponse("error", responseMap);
+            }
             row.addAll(search.startSearch(itemToSearch, colId));
             if (row.isEmpty()) {
               responseMap.put(

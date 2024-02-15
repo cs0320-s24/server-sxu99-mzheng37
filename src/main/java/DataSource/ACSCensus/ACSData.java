@@ -1,19 +1,16 @@
 package DataSource.ACSCensus;
 
 import DataSource.DatasourceException.DataSourceException;
-import Server.Serializer.FailureResponse;
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;
 import com.squareup.moshi.Types;
 import java.lang.reflect.Type;
-import javax.xml.crypto.Data;
 import okio.Buffer;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
-import org.eclipse.jetty.util.IO;
 
 
 public class ACSData implements ACSDataSource {

@@ -1,4 +1,4 @@
-package Server.Serializer;
+package Handler.Serializer;
 
 import com.squareup.moshi.JsonAdapter;
 import com.squareup.moshi.Moshi;

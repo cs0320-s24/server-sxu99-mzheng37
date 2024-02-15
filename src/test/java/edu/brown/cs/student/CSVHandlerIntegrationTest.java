@@ -4,11 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import CSV.Parser.CSVParser;
 import CSV.Parser.CreatorFromRowObjects.StringListCreator;
-import Server.LoadCSVHandler;
-import Server.SearchCSVHandler;
-import Server.Serializer.FailureResponse;
-import Server.Serializer.SuccessResponse;
-import Server.ViewCSVHandler;
+import Handler.LoadCSVHandler;
+import Handler.SearchCSVHandler;
+import Handler.Serializer.FailureResponse;
+import Handler.Serializer.SuccessResponse;
+import Handler.ViewCSVHandler;
 import com.squareup.moshi.Moshi;
 import edu.brown.cs.student.main.FactoryFailureException;
 import java.io.FileReader;
@@ -17,15 +17,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.text.html.parser.Parser;
 import okio.Buffer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import spark.Spark;
 
@@ -265,9 +262,9 @@ public class CSVHandlerIntegrationTest {
     // no header list cannot search with header
     HttpURLConnection clientConnectionS = tryRequest("search?header=false&col=true&colId=Star%20Sign&item=Scorpio");
     assertEquals(200, clientConnectionS.getResponseCode());
-    SuccessResponse responseSearch =
+    FailureResponse responseSearch =
         moshi
-            .adapter(SuccessResponse.class)
+            .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnectionS.getInputStream()));
     assertEquals("header need to be true to search with header name",
         responseSearch.data().get("searching "
@@ -276,7 +273,8 @@ public class CSVHandlerIntegrationTest {
             + "malformed/malformed_signs.csv"
             + " under column name "
             + "Star Sign"));
-    clientConnection.disconnect();
+    clientConnectionS.disconnect();
+
 
     // index out of bound for column index search
     HttpURLConnection clientConnectionS2 = tryRequest("search?header=true&col=true&colId=-1&item=Scorpio");
@@ -297,7 +295,7 @@ public class CSVHandlerIntegrationTest {
             + "malformed/malformed_signs.csv"
             + " with column index "
             + "-1"));
-    clientConnection.disconnect();
+    clientConnectionS2.disconnect();
   }
 
   /**
@@ -389,7 +387,7 @@ public class CSVHandlerIntegrationTest {
         moshi
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    assertEquals("parameters are hasHeader (true/false), col(true/false), colId(colIndex or colName), item(value to search for)"
+    assertEquals("parameters are hasHeader (true/false), col(true/false), colId(colIndex or colName, NA if not needed), item(value to search for)"
         , response.data().get("Not all search parameters has values") );
     clientConnection.disconnect();
 

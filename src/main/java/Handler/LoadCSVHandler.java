@@ -1,9 +1,9 @@
-package Server;
+package Handler;
 
 import CSV.Parser.CSVParser;
 import CSV.Parser.CreatorFromRowObjects.StringListCreator;
-import Server.Serializer.FailureResponse;
-import Server.Serializer.SuccessResponse;
+import Handler.Serializer.FailureResponse;
+import Handler.Serializer.SuccessResponse;
 import edu.brown.cs.student.main.FactoryFailureException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
