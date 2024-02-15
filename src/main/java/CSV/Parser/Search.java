@@ -45,6 +45,18 @@ public class Search {
   }
 
   /**
+   * Constructor used when parsing is not required (Already parsed into list of string holding
+   * header and list of string holding body content)
+   *
+   * @param headerList a list of string containing header values
+   * @param cvsBodyList a list containing main body rows in list of string format
+   */
+  public Search(List<String> headerList, List<List<String>> cvsBodyList) {
+    this.headerList = headerList;
+    this.listSearchThrough = cvsBodyList;
+  }
+
+  /**
    * Compares string a to b after trimming and replacing all whitespaces. Capitalization are viewed
    * as different strings. (Used in Search to see if item an is the same as item b).
    *
