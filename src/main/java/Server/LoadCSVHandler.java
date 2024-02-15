@@ -54,7 +54,6 @@ public class LoadCSVHandler implements Route {
         this.loadedcsv.addAll(csvjson);
         this.loadedFileName.clear();
         this.loadedFileName.add(fileName);
-        System.out.println(loadedFileName);
         responseMap.put("success loading file: ", "data/" + fileName);
         return new SuccessResponse(responseMap).serialize();
       } catch (FactoryFailureException e) {

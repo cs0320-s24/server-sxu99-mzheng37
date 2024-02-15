@@ -35,8 +35,13 @@ public class SearchCSVHandler implements Route {
       if (hasHeader.isEmpty() || useColId.isEmpty() || colId.isEmpty() || itemToSearch.isEmpty()) {
         responseMap.put(
             "Not all search parameters has values",
-            "parameters are hasHeader (true/false), col(true/false), colID(colIndex or colName), item (value to search for)");
+            "parameters are hasHeader (true/false), col(true/false), colId(colIndex or colName), item(value to search for)");
         return new FailureResponse("error_bad_request", responseMap).serialize();
+      }
+
+      if (loadedFileName.isEmpty()) {
+        responseMap.put("No file loaded successfully, please load a file to search", "");
+        return new FailureResponse("error_datasource", responseMap).serialize();
       }
 
       // create search object
@@ -52,8 +57,6 @@ public class SearchCSVHandler implements Route {
       } else {
         mainBodyList.addAll(loadedcsv);
       }
-      System.out.println("header List" + headerList);
-      System.out.println("main body" + mainBodyList);
       Search search = new Search(headerList, mainBodyList);
 
       List<List<String>> row = new ArrayList<>();

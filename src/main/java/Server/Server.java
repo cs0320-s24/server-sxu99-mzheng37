@@ -9,7 +9,7 @@ import java.util.List;
 import spark.Spark;
 
 public class Server {
-  private static final int port = 3231;
+  private static final int port = 3232;
   private final ACSDataSource dataSourceToUSe;
   private static List<String> CSVLoadfileName;
   private static List<List<String>> CSVLoadState;

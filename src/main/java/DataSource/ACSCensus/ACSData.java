@@ -81,8 +81,6 @@ public class ACSData implements ACSDataSource {
    */
   private static HttpURLConnection connect(URL requestURL) throws DataSourceException, IOException {
     URLConnection urlConnection = requestURL.openConnection();
-    if(!(urlConnection instanceof HttpURLConnection))
-      throw new DataSourceException("unexpected: result of connection wasn't HTTP");
     HttpURLConnection clientConnection = (HttpURLConnection) urlConnection;
     clientConnection.connect(); // GET
     if(clientConnection.getResponseCode() != 200)

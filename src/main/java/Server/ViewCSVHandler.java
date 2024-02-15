@@ -35,7 +35,7 @@ public class ViewCSVHandler implements Route {
         return new FailureResponse("error", responseMap).serialize();
       }
     } catch (Exception e) {
-      responseMap.put("Cannot initiate view calls", "");
+      responseMap.put("Cannot initiate view calls; please enter no parameter", "");
       return new FailureResponse("error_bad_json", responseMap).serialize();
     }
 
