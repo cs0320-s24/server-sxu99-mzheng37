@@ -1,3 +1,3 @@
 package DataSource.ACSCensus;
 
-public record BroadBandInfo(Double percentage) { }
+public record BroadBandInfo(Double percentage) {}

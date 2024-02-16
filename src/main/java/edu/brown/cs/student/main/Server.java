@@ -2,6 +2,7 @@ package edu.brown.cs.student.main;
 
 import static spark.Spark.after;
 
+import DataSource.ACSCensus.ACSCache;
 import DataSource.ACSCensus.ACSData;
 import DataSource.ACSCensus.ACSDataSource;
 import Handler.BroadBandHandler;
@@ -12,6 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 import spark.Spark;
 
+/**
+ * A class to initiate a server to connect to various API such as ACS census API and using load,
+ * view, and search CSV functions
+ */
 public class Server {
   private static final int port = 3232;
   private final ACSDataSource dataSourceToUSe;
@@ -24,23 +29,25 @@ public class Server {
     CSVLoadState = new ArrayList<>();
     CSVLoadfileName = new ArrayList<>();
 
-    Spark.get("/", (request, response) -> {
-      response.type("application/json");
-      response.status(200);
+    Spark.get(
+        "/",
+        (request, response) -> {
+          response.type("application/json");
+          response.status(200);
 
-      return "This is Server! Tryout the following: \n \n"
-          + " * /load : provide a file path under your data directory to load in; \n"
-          + "Ex: /load?fileName=stars/ten-star.csv \n \n"
-          + " * /view: view the CSV you have successfully loaded in; \n"
-          + "NOTE: a file must be loaded in to be viewed \n"
-          + "Ex: /view \n \n"
-          + " * /search: search a value and obtain the row it was found in; provide header (true / false), col (true / false), colId (column index or column name), item (value to search for) \n"
-          + "NOTE: a file must be loaded in to be searched \n"
-          + "Ex: /search?header=false&col=true&colId=1&item=Annie \n \n"
-          + " * /broadband: provide a state and county to receive information about its broadband; "
-          + "NOTE: State and County name must be capitalized for the first letter+"
-          + "Ex: /broadband?state=Minnesota?county=Hennepin";
-    });
+          return "This is Server! Tryout the following: \n \n"
+              + " * /load : provide a file path under your data directory to load in; \n"
+              + "Ex: /load?fileName=stars/ten-star.csv \n \n"
+              + " * /view: view the CSV you have successfully loaded in; \n"
+              + "NOTE: a file must be loaded in to be viewed \n"
+              + "Ex: /view \n \n"
+              + " * /search: search a value and obtain the row it was found in; provide header (true / false), col (true / false), colId (column index or column name), item (value to search for) \n"
+              + "NOTE: a file must be loaded in to be searched \n"
+              + "Ex: /search?header=false&col=true&colId=1&item=Annie \n \n"
+              + " * /broadband: provide a state and county to receive information about its broadband; "
+              + "NOTE: State and County name must be capitalized for the first letter+"
+              + "Ex: /broadband?state=Minnesota?county=Hennepin";
+        });
 
     after(
         (request, response) -> {
@@ -63,7 +70,7 @@ public class Server {
 
   public static void main(String[] args) {
 
-    Server server = new Server(new ACSData()); // handle broadband data
+    Server server = new Server(new ACSCache(new ACSData(), 100, 5)); // handle broadband data
     System.out.println("Server started at http://localhost:" + port);
   }
 }

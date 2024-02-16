@@ -2,25 +2,15 @@ package edu.brown.cs.student;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import CSV.Parser.CSVParser;
-import CSV.Parser.CreatorFromRowObjects.StringListCreator;
 import DataSource.ACSCensus.ACSData;
 import Handler.BroadBandHandler;
-import Handler.LoadCSVHandler;
-import Handler.SearchCSVHandler;
 import Handler.Serializer.FailureResponse;
 import Handler.Serializer.SuccessResponse;
-import Handler.ViewCSVHandler;
 import com.squareup.moshi.Moshi;
-import edu.brown.cs.student.main.FactoryFailureException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import okio.Buffer;
@@ -55,7 +45,7 @@ public class BroadBandHandlerTest {
    * Helper to start a connection to a specific API endpoint/params
    *
    * @param apiCall the call string, including endpoint (NOTE: this would be better if it had more
-   *                structure!)
+   *     structure!)
    * @return the connection for the given URL, just after connecting
    * @throws IOException if the connection fails for some reason
    */
@@ -69,9 +59,7 @@ public class BroadBandHandlerTest {
     return clientConnection;
   }
 
-  /**
-   * Test handler with no parameters
-   */
+  /** Test handler with no parameters */
   @Test
   public void testNoParameter() throws IOException {
     HttpURLConnection clientConnection = tryRequest("broadband?state=");
@@ -82,8 +70,9 @@ public class BroadBandHandlerTest {
         moshi
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    assertEquals("", response.data().get(
-        "missing argument, please insert parameters for state and county!"));
+    assertEquals(
+        "missing argument, please insert parameters for state and county!",
+        response.data().get("error message"));
     clientConnection.disconnect();
 
     HttpURLConnection clientConnection2 = tryRequest("broadband");
@@ -93,8 +82,9 @@ public class BroadBandHandlerTest {
         moshi
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection2.getInputStream()));
-    assertEquals("", response2.data().get(
-        "missing argument, please insert parameters for state and county!"));
+    assertEquals(
+        "missing argument, please insert parameters for state and county!",
+        response2.data().get("error message"));
     clientConnection2.disconnect();
   }
 
@@ -109,8 +99,7 @@ public class BroadBandHandlerTest {
         moshi
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    assertEquals("Minnesta", response.data().get(
-        "Given State"));
+    assertEquals("Minnesta", response.data().get("Given State"));
     clientConnection.disconnect();
   }
 
@@ -125,8 +114,7 @@ public class BroadBandHandlerTest {
         moshi
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    assertEquals("Hennepn", response.data().get(
-        "Given County"));
+    assertEquals("Hennepn", response.data().get("Given County"));
     clientConnection.disconnect();
   }
 
@@ -141,19 +129,18 @@ public class BroadBandHandlerTest {
         moshi
             .adapter(SuccessResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    assertEquals(87.6, response.data().get(
-        "Percentage of households with broadband access"));
+    assertEquals(87.6, response.data().get("Percentage of households with broadband access"));
     clientConnection.disconnect();
 
-    assertEquals(LocalDate.now().toString(), response.data().get(
-        "queried date"));
+    assertEquals(LocalDate.now().toString(), response.data().get("queried date"));
     clientConnection.disconnect();
   }
 
   /* Test Valid broadband and return result with Rhode Island */
   @Test
   public void testValidOtherState() throws IOException {
-    HttpURLConnection clientConnection = tryRequest("broadband?state=Rhode%20Island&county=Providence");
+    HttpURLConnection clientConnection =
+        tryRequest("broadband?state=Rhode%20Island&county=Providence");
     assertEquals(200, clientConnection.getResponseCode());
 
     Moshi moshi = new Moshi.Builder().build();
@@ -161,12 +148,10 @@ public class BroadBandHandlerTest {
         moshi
             .adapter(SuccessResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    assertEquals(85.4, response.data().get(
-        "Percentage of households with broadband access"));
+    assertEquals(85.4, response.data().get("Percentage of households with broadband access"));
     clientConnection.disconnect();
 
-    assertEquals("Rhode Island", response.data().get(
-        "state"));
+    assertEquals("Rhode Island", response.data().get("state"));
     clientConnection.disconnect();
   }
 

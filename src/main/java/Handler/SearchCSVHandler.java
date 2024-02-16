@@ -11,42 +11,75 @@ import spark.Request;
 import spark.Response;
 import spark.Route;
 
+/**
+ * A class to handle endpoint to search a loaded CSV. Implements Route to handle and provide
+ * response after user use this API endpoint.
+ */
 public class SearchCSVHandler implements Route {
 
   private List<List<String>> loadedcsv;
   private List<String> loadedFileName;
 
+  /**
+   * Constructor to build a SearchCSVHandler object.
+   *
+   * @param fileName the file that was loaded and ready to view
+   * @param loadedcsv the content (rows) of the CSV
+   */
   public SearchCSVHandler(List<String> fileName, List<List<String>> loadedcsv) {
     this.loadedcsv = loadedcsv;
     this.loadedFileName = fileName;
   }
 
-
+  /**
+   * Handles search endpoints: should be provided parameters header (true or false, for if the file
+   * has header) col (true or false, if the user wants to use column identifier for search) colId
+   * (if col is true, search under given column index number or column name) item (the value to
+   * search for)
+   *
+   * @param request the request to handle
+   * @param response use to modify properties of the response
+   * @return a FailureResponse if the file cannot be searched (for reasons such as no headers
+   *     provided but search under header name requested, no file loaded...); a SuccessResponse if
+   *     the file searched and a search result returned
+   */
   @Override
   public Object handle(Request request, Response response) {
     Map<String, Object> responseMap = new HashMap<>();
     try {
-      // try-catch entire thing
       String hasHeader = request.queryParams("header");
       String useColId = request.queryParams("col");
       String colId = request.queryParams("colId");
       String itemToSearch = request.queryParams("item");
 
-      if (hasHeader.isEmpty() || useColId.isEmpty() || colId.isEmpty() || itemToSearch.isEmpty()) {
+      // check that all parameters are valid
+      if (hasHeader == null
+          || useColId == null
+          || colId == null
+          || itemToSearch == null
+          || hasHeader.isEmpty()
+          || useColId.isEmpty()
+          || colId.isEmpty()
+          || itemToSearch.isEmpty()) {
+        responseMap.put("error message", "Not all search parameters has values");
         responseMap.put(
-            "Not all search parameters has values",
-            "parameters are hasHeader (true/false), col(true/false), colId(colIndex or colName, NA if not needed), item(value to search for)");
+            "the parameters are",
+            "parameters are "
+                + "header=true/false, "
+                + "col=true/false, "
+                + "colId=colIndex or colName, enter false for col if this is not needed, "
+                + "item=value to search for");
         return new FailureResponse("error_bad_request", responseMap).serialize();
       }
 
-      if (loadedFileName.isEmpty()) {
+      // check that a file has been loaded for search
+      if (loadedFileName == null || loadedFileName.isEmpty()) {
         responseMap.put("No file loaded successfully, please load a file to search", "");
         return new FailureResponse("error_datasource", responseMap).serialize();
       }
 
-      // create search object
-
-      // first separate header list out from main body list
+      List<List<String>> row = new ArrayList<>();
+      // first separate header list out from main body list if hasHeader is true
       List<String> headerList = new ArrayList<>();
       List<List<String>> mainBodyList = new ArrayList<>();
       if (hasHeader.equals("true")) {
@@ -57,9 +90,10 @@ public class SearchCSVHandler implements Route {
       } else {
         mainBodyList.addAll(loadedcsv);
       }
+
+      // create search object to pass in headerList and main content of CSV
       Search search = new Search(headerList, mainBodyList);
 
-      List<List<String>> row = new ArrayList<>();
       // check if we use column id or column name for search
       if (useColId.equals("true")) {
         try {
@@ -87,6 +121,7 @@ public class SearchCSVHandler implements Route {
             }
             return new SuccessResponse(responseMap).serialize();
           } catch (ArrayIndexOutOfBoundsException m) {
+            responseMap.put("error message", "given index out of bound");
             responseMap.put(
                 "searching "
                     + itemToSearch
@@ -100,11 +135,11 @@ public class SearchCSVHandler implements Route {
                     + 0
                     + " and upper bound "
                     + loadedcsv.get(0).size());
-            return new FailureResponse("error", responseMap).serialize();
+            return new FailureResponse("error_bad_request", responseMap).serialize();
           }
         } catch (NumberFormatException e) {
-          // search with column name (parsing int failed)
           if (!hasHeader.equals("true")) {
+            responseMap.put("error message", "file does not have headers");
             responseMap.put(
                 "searching "
                     + itemToSearch
@@ -113,14 +148,17 @@ public class SearchCSVHandler implements Route {
                     + " under column name "
                     + colId,
                 "header need to be true to search with header name");
-            responseMap.put("Please ensure that header parameter is true", "");
-            return new FailureResponse("error", responseMap).serialize();
+            return new FailureResponse("error_bad_request", responseMap).serialize();
           } else {
             // check that given header is found in header list, provide available header list if not
             boolean headerExist = false;
             if (headerList.isEmpty()) {
-              responseMap.put("Header list is empty", "Ensure that your CSV has a header to use this search (first row)");
-              return new FailureResponse("error", responseMap);
+              responseMap.put("error message", "Header list is empty");
+              responseMap.put(
+                  "To fix,",
+                  "Ensure that your CSV has a header to use this search (first row); "
+                      + "use view endpoint to check");
+              return new FailureResponse("error_bad_request", responseMap).serialize();
             }
             for (String header : headerList) {
               if (header.equals(colId)) {
@@ -128,15 +166,18 @@ public class SearchCSVHandler implements Route {
                 break;
               }
             }
-            if(!headerExist) {
-              responseMap.put("searching "
-                  + itemToSearch
-                  + " in file "
-                  + loadedFileName.get(0)
-                  + " under column name "
-                  + colId, "Header given doesn't exists");
+            if (!headerExist) {
+              responseMap.put("error message", "Header name not found in list for header");
+              responseMap.put(
+                  "searching "
+                      + itemToSearch
+                      + " in file "
+                      + loadedFileName.get(0)
+                      + " under column name "
+                      + colId,
+                  "Header given doesn't exists");
               responseMap.put("Here are the available headers", headerList);
-              return new FailureResponse("error", responseMap);
+              return new FailureResponse("error_bad_request", responseMap).serialize();
             }
             row.addAll(search.startSearch(itemToSearch, colId));
             if (row.isEmpty()) {
@@ -162,7 +203,7 @@ public class SearchCSVHandler implements Route {
           }
         }
       } else {
-        row.addAll(search.startSearch(itemToSearch));
+        row = new ArrayList<>(search.startSearch(itemToSearch));
         if (row.isEmpty()) {
           responseMap.put(
               "searching " + itemToSearch + " in entire file " + loadedFileName.get(0),
@@ -174,8 +215,15 @@ public class SearchCSVHandler implements Route {
         return new SuccessResponse(responseMap).serialize();
       }
     } catch (Exception e) {
-      responseMap.put("Cannot initiate search calls, please provide parameters", "");
+      responseMap.put("error message", "Cannot initiate search calls, please provide parameters");
+      responseMap.put(
+          "the parameters are",
+          "header=true/false, "
+              + "col=true/false, "
+              + "colId=colIndex or colName, enter false for col if this is not needed, "
+              + "item=value to search for");
       return new FailureResponse("error_bad_json", responseMap).serialize();
     }
   }
+
 }
