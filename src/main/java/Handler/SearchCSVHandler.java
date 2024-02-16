@@ -17,8 +17,8 @@ import spark.Route;
  */
 public class SearchCSVHandler implements Route {
 
-  private List<List<String>> loadedcsv;
-  private List<String> loadedFileName;
+  private final List<List<String>> loadedcsv;
+  private final List<String> loadedFileName;
 
   /**
    * Constructor to build a SearchCSVHandler object.
@@ -108,7 +108,7 @@ public class SearchCSVHandler implements Route {
                       + loadedFileName.get(0)
                       + " under column index "
                       + columnInt,
-                  "not found in csv file");
+                  "not found under col index " + columnInt);
             } else {
               responseMap.put(
                   "searching "
@@ -188,7 +188,7 @@ public class SearchCSVHandler implements Route {
                       + loadedFileName.get(0)
                       + " under column name "
                       + colId,
-                  "not found in csv file");
+                  "not found under col name " + colId);
             } else {
               responseMap.put(
                   "searching "
@@ -225,5 +225,4 @@ public class SearchCSVHandler implements Route {
       return new FailureResponse("error_bad_json", responseMap).serialize();
     }
   }
-
 }

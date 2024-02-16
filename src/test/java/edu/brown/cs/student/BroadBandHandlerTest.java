@@ -154,5 +154,4 @@ public class BroadBandHandlerTest {
     assertEquals("Rhode Island", response.data().get("state"));
     clientConnection.disconnect();
   }
-
 }

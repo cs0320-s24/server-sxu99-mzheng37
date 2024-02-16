@@ -21,13 +21,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import okio.Buffer;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testng.annotations.BeforeClass;
 import spark.Spark;
 
 public class CSVHandlerIntegrationTest {
-  @BeforeAll
+  @BeforeClass
   public static void setup_before_everything() {
     Spark.port(0);
     Logger.getLogger("").setLevel(Level.WARNING);
@@ -161,7 +161,7 @@ public class CSVHandlerIntegrationTest {
             .fromJson(new Buffer().readFrom(clientConnectionS3.getInputStream()));
 
     assertEquals(
-        "not found in csv file",
+        "not found under col index 1",
         responseSearch3
             .data()
             .get(
@@ -172,6 +172,71 @@ public class CSVHandlerIntegrationTest {
                     + " under column index "
                     + "1"));
     clientConnection.disconnect();
+  }
+
+  /** Test CSVLoad, View, Search with given Rhode Island data */
+  @Test
+  public void testGivenRhodeIslandData() throws IOException, FactoryFailureException {
+    HttpURLConnection clientConnection = tryRequest("load?fileName=rhodeisland/RICity.csv");
+    assertEquals(200, clientConnection.getResponseCode());
+
+    Moshi moshi = new Moshi.Builder().build();
+    SuccessResponse response =
+        moshi
+            .adapter(SuccessResponse.class)
+            .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
+    assertEquals("data/rhodeisland/RICity.csv", response.data().get("success loading file"));
+    clientConnection.disconnect();
+
+    // view with same loaded file
+    HttpURLConnection clientConnectionV = tryRequest("view");
+    assertEquals(200, clientConnectionV.getResponseCode());
+    SuccessResponse responseView =
+        moshi
+            .adapter(SuccessResponse.class)
+            .fromJson(new Buffer().readFrom(clientConnectionV.getInputStream()));
+    FileReader fileReader = new FileReader("data/rhodeisland/RICity.csv");
+    CSVParser<List<String>> parser = new CSVParser<>(fileReader, new StringListCreator(), false);
+    parser.parse();
+    assertEquals(parser.getParseResult(), responseView.data().get("data/rhodeisland/RICity.csv"));
+    clientConnectionV.disconnect();
+
+    // no column identifier, search entire file
+    HttpURLConnection clientConnectionS =
+        tryRequest("search?header=true&col=false&colId=false&item=Exeter");
+    assertEquals(200, clientConnectionS.getResponseCode());
+    SuccessResponse responseSearch =
+        moshi
+            .adapter(SuccessResponse.class)
+            .fromJson(new Buffer().readFrom(clientConnectionS.getInputStream()));
+    assertEquals(
+        List.of(parser.getParseResult().get(12)),
+        responseSearch
+            .data()
+            .get("searching " + "Exeter" + " in entire file " + "rhodeisland/RICity.csv"));
+    clientConnectionS.disconnect();
+
+    // not found under header name but found in file
+    HttpURLConnection clientConnectionS2 =
+        tryRequest("search?header=true&col=true&colId=Median%20Family%20Income&item=Hopkinton");
+    assertEquals(200, clientConnectionS2.getResponseCode());
+    SuccessResponse responseSearch2 =
+        moshi
+            .adapter(SuccessResponse.class)
+            .fromJson(new Buffer().readFrom(clientConnectionS2.getInputStream()));
+
+    assertEquals(
+        "not found under col name Median Family Income",
+        responseSearch2
+            .data()
+            .get(
+                "searching "
+                    + "Hopkinton"
+                    + " in file "
+                    + "rhodeisland/RICity.csv"
+                    + " under column name "
+                    + "Median Family Income"));
+    clientConnectionS2.disconnect();
   }
 
   /** Test CSVLoad, View, Search handlers with header & malformed file */
@@ -185,8 +250,7 @@ public class CSVHandlerIntegrationTest {
         moshi
             .adapter(SuccessResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    assertEquals(
-        "data/malformed/malformed_signs.csv", response.data().get("success loading file"));
+    assertEquals("data/malformed/malformed_signs.csv", response.data().get("success loading file"));
     clientConnection.disconnect();
 
     // view with same loaded file
@@ -237,7 +301,7 @@ public class CSVHandlerIntegrationTest {
             .adapter(SuccessResponse.class)
             .fromJson(new Buffer().readFrom(clientConnectionS2.getInputStream()));
     assertEquals(
-        "not found in csv file",
+        "not found under col name Star Sign",
         responseSearch2
             .data()
             .get(
@@ -279,8 +343,7 @@ public class CSVHandlerIntegrationTest {
         moshi
             .adapter(SuccessResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    assertEquals(
-        "data/malformed/malformed_signs.csv", response.data().get("success loading file"));
+    assertEquals("data/malformed/malformed_signs.csv", response.data().get("success loading file"));
     clientConnection.disconnect();
 
     // initiate parser object as expected (see unit test for parsing)
@@ -343,10 +406,8 @@ public class CSVHandlerIntegrationTest {
         moshi
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnectionS3.getInputStream()));
-    assertEquals("Header name not found in list for header",
-        responseSearch3
-            .data()
-            .get("error message"));
+    assertEquals(
+        "Header name not found in list for header", responseSearch3.data().get("error message"));
     clientConnectionS3.disconnect();
   }
 
@@ -362,7 +423,9 @@ public class CSVHandlerIntegrationTest {
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
     assertEquals("data/malformed/malform_signs.csv", response.data().get("File"));
-    assertEquals("No file is found with given file name under the data directory", response.data().get("error message"));
+    assertEquals(
+        "No file is found with given file name under the data directory",
+        response.data().get("error message"));
 
     clientConnection.disconnect();
   }
@@ -377,9 +440,7 @@ public class CSVHandlerIntegrationTest {
         moshi
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    assertEquals(
-        "No file name inputted as parameter",
-        response.data().get("error message"));
+    assertEquals("No file name inputted as parameter", response.data().get("error message"));
     clientConnection.disconnect();
 
     HttpURLConnection clientConnection2 = tryRequest("load?");
@@ -388,11 +449,7 @@ public class CSVHandlerIntegrationTest {
         moshi
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection2.getInputStream()));
-    assertEquals(
-        "No file name inputted as parameter",
-        response2
-            .data()
-            .get("error message"));
+    assertEquals("No file name inputted as parameter", response2.data().get("error message"));
     clientConnection.disconnect();
   }
 
@@ -430,7 +487,6 @@ public class CSVHandlerIntegrationTest {
     clientConnection.disconnect();
   }
 
-
   /** Test search with empty parameters */
   @Test
   public void testSearchEmptyParameter() throws IOException {
@@ -442,9 +498,7 @@ public class CSVHandlerIntegrationTest {
         moshi
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    assertEquals(
-        "Not all search parameters has values",
-        response.data().get("error message"));
+    assertEquals("Not all search parameters has values", response.data().get("error message"));
     clientConnection.disconnect();
 
     // all parameters empty
@@ -454,10 +508,37 @@ public class CSVHandlerIntegrationTest {
         moshi
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection2.getInputStream()));
-    assertEquals(
-        "Not all search parameters has values", response2.data().get("error message"));
+    assertEquals("Not all search parameters has values", response2.data().get("error message"));
     clientConnection.disconnect();
   }
 
+  /** Test loading files outside data directory */
+  @Test
+  public void testLoadingFileOutsideData() throws IOException {
+    // some parameters empty
+    HttpURLConnection clientConnection =
+        tryRequest("load?fileName=test/java/edu.brown.cs.student/ACSDataSourceUnitTest");
+    assertEquals(200, clientConnection.getResponseCode());
+    Moshi moshi = new Moshi.Builder().build();
+    FailureResponse response =
+        moshi
+            .adapter(FailureResponse.class)
+            .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
+    assertEquals(
+        "No file is found with given file name under the data directory",
+        response.data().get("error message"));
+    clientConnection.disconnect();
 
+    HttpURLConnection clientConnection2 =
+        tryRequest("load?fileName=../src/main/java/DataSource/DatasourceException");
+    assertEquals(200, clientConnection2.getResponseCode());
+    FailureResponse response2 =
+        moshi
+            .adapter(FailureResponse.class)
+            .fromJson(new Buffer().readFrom(clientConnection2.getInputStream()));
+    assertEquals(
+        "No file is found with given file name under the data directory",
+        response2.data().get("error message"));
+    clientConnection.disconnect();
+  }
 }
