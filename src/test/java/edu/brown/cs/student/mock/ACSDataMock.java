@@ -12,7 +12,7 @@ import DataSource.ACSCensus.BroadBandInfo;
 public class ACSDataMock implements ACSDataSource {
   private final StateCodeResponse constantStateCode;
   private final CountyCodeResponse constantCountyCode;
-  private final BroadBandInfo constnatBroadBand;
+  private final BroadBandInfo constantBroadBand;
 
   /**
    * Constructor for ACSDataMock to create fake ACS data for testing.
@@ -25,7 +25,7 @@ public class ACSDataMock implements ACSDataSource {
       StateCodeResponse stateCode, CountyCodeResponse countyCode, BroadBandInfo broadBand) {
     this.constantStateCode = stateCode;
     this.constantCountyCode = countyCode;
-    this.constnatBroadBand = broadBand;
+    this.constantBroadBand = broadBand;
   }
   ;
 
@@ -64,6 +64,6 @@ public class ACSDataMock implements ACSDataSource {
   @Override
   public BroadBandInfo getBroadBandInfo(String stateCode, String countyCode)
       throws IllegalArgumentException, NullPointerException {
-    return constnatBroadBand;
+    return constantBroadBand;
   }
 }
