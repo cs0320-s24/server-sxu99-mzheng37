@@ -64,6 +64,8 @@ public class BroadBandHandler implements Route {
         if (stateCodeMap.stateCodes().containsKey(state)) {
           stateCode = stateCodeMap.stateCodes().get(state);
         } else {
+          responseMap.put("queried date", LocalDate.now().toString());
+          responseMap.put("queried time", LocalTime.now().toString());
           responseMap.put(
               "error message",
               "State code not found with given state parameter "
@@ -75,6 +77,8 @@ public class BroadBandHandler implements Route {
         if (countyCodeMap.countyCodes().containsKey(county + " County, " + state)) {
           countyCode = countyCodeMap.countyCodes().get(county + " County, " + state);
         } else {
+          responseMap.put("queried date", LocalDate.now().toString());
+          responseMap.put("queried time", LocalTime.now().toString());
           responseMap.put(
               "error message",
               "County code not found with given state code and county "
@@ -84,10 +88,18 @@ public class BroadBandHandler implements Route {
         }
       } catch (IllegalArgumentException | NullPointerException e) {
         e.printStackTrace();
+        responseMap.put("state", state);
+        responseMap.put("county", county);
+        responseMap.put("queried date", LocalDate.now().toString());
+        responseMap.put("queried time", LocalTime.now().toString());
         responseMap.put("error message", e.getMessage());
         return new FailureResponse("error_bad_request", responseMap).serialize();
       } catch (DataSourceException | IOException e) {
         e.printStackTrace();
+        responseMap.put("state", state);
+        responseMap.put("county", county);
+        responseMap.put("queried date", LocalDate.now().toString());
+        responseMap.put("queried time", LocalTime.now().toString());
         responseMap.put("error message", e.getMessage());
         responseMap.put(
             "Suggestions",
@@ -98,6 +110,10 @@ public class BroadBandHandler implements Route {
 
       BroadBandInfo broadBandInfo = source.getBroadBandInfo(stateCode, countyCode);
       if (broadBandInfo == null) {
+        responseMap.put("queried date", LocalDate.now().toString());
+        responseMap.put("queried time", LocalTime.now().toString());
+        responseMap.put("state", state);
+        responseMap.put("county", county);
         responseMap.put("error message", "cannot get broadband info");
         return new FailureResponse("error", responseMap).serialize();
       }
@@ -110,6 +126,8 @@ public class BroadBandHandler implements Route {
       return new SuccessResponse(responseMap).serialize();
     } catch (Exception e) {
       e.printStackTrace();
+      responseMap.put("queried date", LocalDate.now().toString());
+      responseMap.put("queried time", LocalTime.now().toString());
       responseMap.put(
           "error message",
           "Cannot initiate broadband calls, please provide parameters "

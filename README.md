@@ -10,6 +10,7 @@
     * From here, the handlers uses the CSV Parse and Search classes to carry out parsing the file and searching the file 
     * More specific documentation on the CSV Parse and Search class can be found in this repo: https://github.com/cs0320-s24/csv-YUUU23
 * For the BroadBandHandler, an interface (ACSDataSource) is implemented by ACSData(direct access to the US census API) or ACSCache (caching before directly accessing the US Census API Datasource); both of these implements the basic functionalities of getStateCode(), getCountyCode(), and getBroadBandInfo()  
+  * The DatasourceException class throws exceptions when the query url is not valid; this can arise with reasons such as a county or state is not found when returning broadband info. 
 
 # Errors/Bugs
 * potential error may arise from not the correct type of errors being thrown; there may be more appropriate type of error that should've been thrown in those places
@@ -17,6 +18,7 @@
 # Tests
 * BroadBandHandlerTest: integration testing with the ACS census to retrieve broadband data based on state and county 
 * BroadBandHandlerTestWithMock: mocking data after the ACS census to simulate responses to not over access the real API datasource 
+  * Under the mock package, there is a ACSDataMock class that implements ACSDataSource also which provide the functions to obtain Broadband information but with directly taking the mocked values passed-in and returning those
 * CSVHandlerIntegrationTest: integration testing with load, view, and search CSV endpoints accessed through the handler
 * ACSDataSourceUnitTest: test functions that deals with access the ACS census directly, such as getStateCode(), getCountyCode(), and getBroadBandInfo()
 * ACSCacheUnitTest: test caching with different broadband entries being added and mixed with querying the same entries after it was just being added or eviction after certain amount of entries added in

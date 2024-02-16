@@ -1,12 +1,10 @@
 package edu.brown.cs.student;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import DataSource.ACSCensus.ACSData.CountyCodeResponse;
 import DataSource.ACSCensus.ACSData.StateCodeResponse;
 import DataSource.ACSCensus.BroadBandInfo;
-import DataSource.DatasourceException.DataSourceException;
 import Handler.BroadBandHandler;
 import Handler.Serializer.FailureResponse;
 import Handler.Serializer.SuccessResponse;
@@ -18,48 +16,20 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.sound.midi.SysexMessage;
 import okio.Buffer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testng.annotations.BeforeClass;
 import spark.Spark;
 
+/**
+ * Use Mock data to test integration with broadband handlers and unit testing with ACS Data source
+ * functions
+ */
 public class BroadBandHandlerTestWithMock {
-  ACSDataMock mock;
-
   @BeforeClass
-  public static void setup_before_everything() {
+  public void setUp() {
     Spark.port(0);
     Logger.getLogger("").setLevel(Level.WARNING);
-  }
-
-  @BeforeEach
-  public void setup() {
-    HashMap<String, String> stateCode = new HashMap<>();
-    stateCode.put("California", "30");
-    stateCode.put("Minnesota", "20");
-    stateCode.put("North Carolina", "12");
-
-    HashMap<String, String> mnCountyCodes = new HashMap<>();
-    mnCountyCodes.put("Hennepin County, Minnesota", "303");
-    mnCountyCodes.put("Dakota County, Minnesota", "211");
-
-    StateCodeResponse stateCodeResponse = new StateCodeResponse(stateCode);
-    CountyCodeResponse countyCodeMN = new CountyCodeResponse(mnCountyCodes);
-    BroadBandInfo broadBand = new BroadBandInfo(20.3);
-    mock = new ACSDataMock(stateCodeResponse, countyCodeMN, broadBand);
-
-    Spark.get("broadband", new BroadBandHandler(mock));
-    Spark.init();
-    Spark.awaitInitialization();
-  }
-
-  @AfterEach
-  public void teardown() {
-    Spark.unmap("broadband");
-    Spark.awaitStop();
   }
 
   /**
@@ -73,9 +43,7 @@ public class BroadBandHandlerTestWithMock {
   private static HttpURLConnection tryRequest(String apiCall) throws IOException {
     URL requestURL = new URL("http://localhost:" + Spark.port() + "/" + apiCall);
     HttpURLConnection clientConnection = (HttpURLConnection) requestURL.openConnection();
-
     clientConnection.setRequestMethod("GET");
-
     clientConnection.connect();
     return clientConnection;
   }
@@ -83,6 +51,24 @@ public class BroadBandHandlerTestWithMock {
   /* Test County not found */
   @Test
   public void testCountyNotFound() throws IOException {
+
+    HashMap<String, String> stateCode = new HashMap<>();
+    stateCode.put("California", "30");
+    stateCode.put("Minnesota", "20");
+    stateCode.put("North Carolina", "12");
+
+    HashMap<String, String> mnCountyCodes = new HashMap<>();
+    mnCountyCodes.put("Hennepin County, Minnesota", "303");
+    mnCountyCodes.put("Dakota County, Minnesota", "211");
+
+    StateCodeResponse stateCodeResponse = new StateCodeResponse(stateCode);
+    CountyCodeResponse countyCodeMN = new CountyCodeResponse(mnCountyCodes);
+    BroadBandInfo broadBand = new BroadBandInfo(20.3);
+    ACSDataMock mock = new ACSDataMock(stateCodeResponse, countyCodeMN, broadBand);
+    Spark.get("broadband", new BroadBandHandler(mock));
+    Spark.init();
+    Spark.awaitInitialization();
+
     HttpURLConnection clientConnection = tryRequest("broadband?state=Minnesota&county=Hennepn");
     assertEquals(200, clientConnection.getResponseCode());
 
@@ -92,6 +78,76 @@ public class BroadBandHandlerTestWithMock {
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
     assertEquals("Hennepn", response.data().get("Given County"));
+    Spark.unmap("broadband");
+    Spark.awaitStop();
+    clientConnection.disconnect();
+  }
+
+  /* Test Valid broadband and return result */
+  @Test
+  public void testValid() throws IOException {
+
+    HashMap<String, String> stateCode = new HashMap<>();
+    stateCode.put("California", "30");
+    stateCode.put("Minnesota", "20");
+    stateCode.put("North Carolina", "12");
+
+    HashMap<String, String> mnCountyCodes = new HashMap<>();
+    mnCountyCodes.put("Hennepin County, Minnesota", "303");
+    mnCountyCodes.put("Dakota County, Minnesota", "211");
+
+    StateCodeResponse stateCodeResponse = new StateCodeResponse(stateCode);
+    CountyCodeResponse countyCodeMN = new CountyCodeResponse(mnCountyCodes);
+    BroadBandInfo broadBand = new BroadBandInfo(20.3);
+    ACSDataMock mock = new ACSDataMock(stateCodeResponse, countyCodeMN, broadBand);
+    Spark.get("broadband", new BroadBandHandler(mock));
+    Spark.init();
+    Spark.awaitInitialization();
+
+    HttpURLConnection clientConnection = tryRequest("broadband?state=Minnesota&county=Dakota");
+    assertEquals(200, clientConnection.getResponseCode());
+
+    Moshi moshi = new Moshi.Builder().build();
+    SuccessResponse response =
+        moshi
+            .adapter(SuccessResponse.class)
+            .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
+    assertEquals(20.3, response.data().get("Percentage of households with broadband access"));
+
+    Spark.unmap("broadband");
+    Spark.awaitStop();
+    clientConnection.disconnect();
+  }
+
+  /* Test ACS unit functions with mocking */
+  @Test
+  public void testACSUnitFunctions() throws IOException {
+    HashMap<String, String> stateCode = new HashMap<>();
+    stateCode.put("California", "30");
+    stateCode.put("Minnesota", "20");
+    stateCode.put("North Carolina", "12");
+
+    HashMap<String, String> mnCountyCodes = new HashMap<>();
+    mnCountyCodes.put("Hennepin County, Minnesota", "303");
+    mnCountyCodes.put("Dakota County, Minnesota", "211");
+
+    StateCodeResponse stateCodeResponse = new StateCodeResponse(stateCode);
+    CountyCodeResponse countyCodeMN = new CountyCodeResponse(mnCountyCodes);
+    BroadBandInfo broadBand = new BroadBandInfo(20.3);
+    ACSDataMock mock = new ACSDataMock(stateCodeResponse, countyCodeMN, broadBand);
+    Spark.get("broadband", new BroadBandHandler(mock));
+    Spark.init();
+    Spark.awaitInitialization();
+
+    HttpURLConnection clientConnection = tryRequest("broadband?state=Minnesota&county=Hennepn");
+    assertEquals(200, clientConnection.getResponseCode());
+
+    assertEquals("30", mock.getStateCode().stateCodes().get("California"));
+    assertEquals(20.3, mock.getBroadBandInfo("30", "20").percentage());
+    assertEquals("303", mock.getCountyCode("20").countyCodes().get("Hennepin County, Minnesota"));
+
+    Spark.unmap("broadband");
+    Spark.awaitStop();
     clientConnection.disconnect();
   }
 
@@ -105,7 +161,7 @@ public class BroadBandHandlerTestWithMock {
 
     StateCodeResponse stateCodeResponse = new StateCodeResponse(stateCode);
     CountyCodeResponse countyCodeMN = new CountyCodeResponse(mnCountyCodes);
-    BroadBandInfo broadBand = new BroadBandInfo(20.3);
+    BroadBandInfo broadBand = new BroadBandInfo(0.0);
     ACSDataMock mock2 = new ACSDataMock(stateCodeResponse, countyCodeMN, broadBand);
 
     Spark.get("broadband", new BroadBandHandler(mock2));
@@ -120,18 +176,35 @@ public class BroadBandHandlerTestWithMock {
         moshi
             .adapter(FailureResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    System.out.println(response);
-    assertEquals("Hennepn", response.data().get("Hennepin"));
+    assertEquals(
+        "State code not found with given state parameter "
+            + "(please check first letter of state is capitalized)",
+        response.data().get("error message"));
     clientConnection.disconnect();
 
     Spark.unmap("broadband");
     Spark.awaitStop();
   }
 
-  /* Test Valid broadband and return result */
+  /* Test the county not found with mock data */
   @Test
-  public void testValid() throws IOException {
-    HttpURLConnection clientConnection = tryRequest("broadband?state=Minnesota&county=Dakota");
+  public void testCountyCodeNotFound() throws IOException {
+    HashMap<String, String> stateCode = new HashMap<>();
+    stateCode.put("California", "30");
+    HashMap<String, String> mnCountyCodes = new HashMap<>();
+    mnCountyCodes.put("Hennein County, Minnesota", "303");
+    mnCountyCodes.put("Dakota County, Minnesota", "211");
+
+    StateCodeResponse stateCodeResponse = new StateCodeResponse(stateCode);
+    CountyCodeResponse countyCodeMN = new CountyCodeResponse(mnCountyCodes);
+    BroadBandInfo broadBand = new BroadBandInfo(40.3);
+    ACSDataMock mock3 = new ACSDataMock(stateCodeResponse, countyCodeMN, broadBand);
+
+    Spark.get("broadband", new BroadBandHandler(mock3));
+    Spark.init();
+    Spark.awaitInitialization();
+
+    HttpURLConnection clientConnection = tryRequest("broadband?state=California&county=Hennepin");
     assertEquals(200, clientConnection.getResponseCode());
 
     Moshi moshi = new Moshi.Builder().build();
@@ -139,21 +212,13 @@ public class BroadBandHandlerTestWithMock {
         moshi
             .adapter(SuccessResponse.class)
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
-    System.out.println(response);
-    assertEquals(20.3, response.data().get("Percentage of households with broadband access"));
-
+    assertEquals(
+        "County code not found with given state code and county parameter "
+            + "(please check first letter of county is capitalized)",
+        response.data().get("error message"));
     clientConnection.disconnect();
+
+    Spark.unmap("broadband");
+    Spark.awaitStop();
   }
-
-  /**
-   * Test getState and getCounty and getBroadBand Info with mocking (unit testing)
-   */
-  @Test
-  public void testGetState()  {
-    assertEquals("30", mock.getStateCode().stateCodes().get("California"));
-    assertEquals(20.3, mock.getBroadBandInfo("30", "20").percentage());
-    assertEquals("303", mock.getCountyCode("20").countyCodes().get("Hennepin County, Minnesota"));
-  }
-
-
 }

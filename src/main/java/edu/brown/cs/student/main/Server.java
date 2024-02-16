@@ -70,6 +70,7 @@ public class Server {
   public static void main(String[] args) {
 
     Server server = new Server(new ACSCache(new ACSData(), 10, 5)); // handle broadband data
-    System.out.println("Server started at http://localhost:" + port);
+    System.out.println(
+        "Server started at http://localhost:" + port + " click on this for more directions");
   }
 }
