@@ -13,8 +13,7 @@ public record SuccessResponse(String response_type, Map<String, Object> data) {
   public String serialize() {
     try {
       Moshi moshi = new Moshi.Builder().build();
-      JsonAdapter<SuccessResponse> adapter =
-          moshi.adapter(SuccessResponse.class);
+      JsonAdapter<SuccessResponse> adapter = moshi.adapter(SuccessResponse.class);
       return adapter.toJson(this);
     } catch (Exception e) {
       // internal error
@@ -22,5 +21,4 @@ public record SuccessResponse(String response_type, Map<String, Object> data) {
       throw e;
     }
   }
-
 }

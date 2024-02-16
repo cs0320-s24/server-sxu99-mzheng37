@@ -35,8 +35,11 @@ public class CSVParser<T> {
   public CSVParser(Reader reader, CreatorFromRow<T> rowObjectCreator, boolean hasHeader)
       throws IOException {
     this.reader = reader;
+    if (reader == null) {
+      throw new IllegalArgumentException("No readers for parse, please provide a reader");
+    }
     if (rowObjectCreator == null) {
-      throw new IOException("rowObjectCreator cannot be null!");
+      throw new IllegalArgumentException("rowObjectCreator cannot be null!");
     } else {
       this.rowObjectCreator = rowObjectCreator;
     }

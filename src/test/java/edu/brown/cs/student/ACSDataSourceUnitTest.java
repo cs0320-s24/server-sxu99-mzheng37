@@ -8,16 +8,13 @@ import DataSource.ACSCensus.ACSData.CountyCodeResponse;
 import DataSource.ACSCensus.ACSData.StateCodeResponse;
 import DataSource.ACSCensus.BroadBandInfo;
 import DataSource.DatasourceException.DataSourceException;
-import edu.brown.cs.student.main.FactoryFailureException;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 public class ACSDataSourceUnitTest {
   ACSData dataSource = new ACSData();
 
-  /**
-   * Test get state codes success
-   */
+  /** Test get state codes success */
   @Test
   public void testGetStateCode() throws DataSourceException, IOException {
     StateCodeResponse stateCodes;
@@ -26,10 +23,7 @@ public class ACSDataSourceUnitTest {
     assertEquals("72", stateCodes.stateCodes().get("Puerto Rico"));
   }
 
-
-  /**
-   * Test get state codes success
-   */
+  /** Test get state codes success */
   @Test
   public void testGetCountyCodeSuccess() throws DataSourceException, IOException {
     CountyCodeResponse countyCode;
@@ -41,22 +35,17 @@ public class ACSDataSourceUnitTest {
     assertEquals("041", countyCodeC.countyCodes().get("Marin County, California"));
   }
 
-
-  /**
-   * Test invalid state code provided to getCountyCode and no state code provided
-   */
+  /** Test invalid state code provided to getCountyCode and no state code provided */
   @Test
   public void testGetCountyCodeFail() {
     Exception exceptionNoStateCode =
-        assertThrows(IllegalArgumentException.class, () ->  dataSource.getCountyCode(""));
+        assertThrows(IllegalArgumentException.class, () -> dataSource.getCountyCode(""));
 
     Exception exceptionInvalidStateCode =
-        assertThrows(DataSourceException.class, () ->  dataSource.getCountyCode("10000"));
+        assertThrows(DataSourceException.class, () -> dataSource.getCountyCode("10000"));
   }
 
-  /**
-   * Test get Broadband Data Valid
-   */
+  /** Test get Broadband Data Valid */
   @Test
   public void testBroadbandValid() throws DataSourceException, IOException {
     ACSData dataSource2 = new ACSData();
@@ -64,29 +53,22 @@ public class ACSDataSourceUnitTest {
     assertEquals(94.0, info.percentage());
   }
 
-  /**
-   * Test Broadband state and county not found
-   */
+  /** Test Broadband state and county not found */
   @Test
-  public void testBroadBandStateAndCountyNotFound(){
+  public void testBroadBandStateAndCountyNotFound() {
     Exception exceptionNotFoundState =
-        assertThrows(DataSourceException.class, () ->  dataSource.getBroadBandInfo("bghb", "041"));
+        assertThrows(DataSourceException.class, () -> dataSource.getBroadBandInfo("bghb", "041"));
     Exception exceptionNotFoundCounty =
-        assertThrows(DataSourceException.class, () ->  dataSource.getBroadBandInfo("bghb", "-2"));
-
+        assertThrows(DataSourceException.class, () -> dataSource.getBroadBandInfo("bghb", "-2"));
   }
 
-  /**
-   * Test Broadband empty parameter
-   */
+  /** Test Broadband empty parameter */
   @Test
   public void testBroadbandParametersEmpty() throws DataSourceException, IOException {
     Exception exceptionEmpty =
-        assertThrows(IllegalArgumentException.class, () ->  dataSource.getBroadBandInfo("", "-3"));
+        assertThrows(IllegalArgumentException.class, () -> dataSource.getBroadBandInfo("", "-3"));
 
     Exception exceptionNull =
-        assertThrows(IllegalArgumentException.class, () ->  dataSource.getBroadBandInfo("", null));
+        assertThrows(IllegalArgumentException.class, () -> dataSource.getBroadBandInfo("", null));
   }
-
-
 }
