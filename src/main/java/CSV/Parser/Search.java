@@ -31,7 +31,7 @@ public class Search {
   public Search(String fileName, boolean hasHeader) throws FactoryFailureException, IOException {
     // to make files only under data directory accessible
     if (fileName.charAt(0) == '.') {
-      System.out.println(fileName.charAt(0));
+      //System.out.println(fileName.charAt(0));
       throw new IOException("invalid file name");
     }
     Reader fileReader = new FileReader("data/" + fileName);
