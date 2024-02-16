@@ -7,7 +7,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -89,7 +91,21 @@ public class ACSCache implements ACSDataSource {
   @Override
   public BroadBandInfo getBroadBandInfo(String stateCode, String countyCode)
       throws IllegalArgumentException, NullPointerException {
+    BroadBandInfo result = cache.getUnchecked(List.of(stateCode, countyCode));
     System.out.println(cache.stats());
-    return cache.getUnchecked(List.of(stateCode, countyCode));
+    return result;
   }
+
+  /**
+   * Gets cache statistics for testing in a map
+   */
+  public Map<String, Long> getStats() {
+    Map<String, Long> map = new HashMap<>();
+    map.put("Hit", cache.stats().hitCount());
+    map.put("Load", cache.stats().loadCount());
+    map.put("Miss", cache.stats().missCount());
+    map.put("Eviction", cache.stats().evictionCount());
+    return map;
+  }
+
 }

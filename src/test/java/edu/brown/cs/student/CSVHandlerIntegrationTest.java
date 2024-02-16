@@ -26,6 +26,9 @@ import org.junit.jupiter.api.Test;
 import org.testng.annotations.BeforeClass;
 import spark.Spark;
 
+/**
+ * Test CSVhandlers (view, load, search)
+ */
 public class CSVHandlerIntegrationTest {
   @BeforeClass
   public static void setup_before_everything() {

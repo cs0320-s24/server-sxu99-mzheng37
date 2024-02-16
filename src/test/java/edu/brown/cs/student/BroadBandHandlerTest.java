@@ -20,6 +20,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import spark.Spark;
 
+/**
+ * Test Broadbandhandler without cache class
+ */
 public class BroadBandHandlerTest {
 
   @BeforeAll
