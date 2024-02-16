@@ -13,8 +13,8 @@ import spark.Route;
  * after user use this API endpoint.
  */
 public class ViewCSVHandler implements Route {
-  private List<List<String>> loadedCSV;
-  private List<String> loadedFileName;
+  private final List<List<String>> loadedCSV;
+  private final List<String> loadedFileName;
 
   /**
    * Constructor to build a ViewCSVHandler object.

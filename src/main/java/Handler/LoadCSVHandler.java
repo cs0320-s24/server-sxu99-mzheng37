@@ -19,8 +19,8 @@ import spark.Route;
  */
 public class LoadCSVHandler implements Route {
 
-  private List<List<String>> loadedcsv;
-  private List<String> loadedFileName;
+  private final List<List<String>> loadedcsv;
+  private final List<String> loadedFileName;
 
   /**
    * Constructor for a LoadCSVHandler.

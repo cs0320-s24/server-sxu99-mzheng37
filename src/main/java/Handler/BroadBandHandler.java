@@ -89,8 +89,10 @@ public class BroadBandHandler implements Route {
       } catch (DataSourceException | IOException e) {
         e.printStackTrace();
         responseMap.put("error message", e.getMessage());
-        responseMap.put("Suggestions", "double check that the state and county actually exists. "
-            + "note: county with low population may not be in the data source");
+        responseMap.put(
+            "Suggestions",
+            "double check that the state and county actually exists. "
+                + "note: county with low population may not be in the data source");
         return new FailureResponse("error_datasource", responseMap).serialize();
       }
 
@@ -99,7 +101,6 @@ public class BroadBandHandler implements Route {
         responseMap.put("error message", "cannot get broadband info");
         return new FailureResponse("error", responseMap).serialize();
       }
-      ;
 
       responseMap.put("queried date", LocalDate.now().toString());
       responseMap.put("queried time", LocalTime.now().toString());

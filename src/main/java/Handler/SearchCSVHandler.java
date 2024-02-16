@@ -17,8 +17,8 @@ import spark.Route;
  */
 public class SearchCSVHandler implements Route {
 
-  private List<List<String>> loadedcsv;
-  private List<String> loadedFileName;
+  private final List<List<String>> loadedcsv;
+  private final List<String> loadedFileName;
 
   /**
    * Constructor to build a SearchCSVHandler object.
@@ -225,5 +225,4 @@ public class SearchCSVHandler implements Route {
       return new FailureResponse("error_bad_json", responseMap).serialize();
     }
   }
-
 }

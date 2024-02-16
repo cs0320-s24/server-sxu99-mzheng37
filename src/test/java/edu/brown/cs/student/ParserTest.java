@@ -140,6 +140,7 @@ public class ParserTest {
   public void testNullCreatorFromObj() throws IOException {
     Reader stringReader = new StringReader("hi,bye\nGood Morning,Good Night");
     Exception exception =
-        assertThrows(IOException.class, () -> new CSVParser<Object>(stringReader, null, false));
+        assertThrows(
+            IllegalArgumentException.class, () -> new CSVParser<Object>(stringReader, null, false));
   }
 }
