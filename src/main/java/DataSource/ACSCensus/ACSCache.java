@@ -96,9 +96,7 @@ public class ACSCache implements ACSDataSource {
     return result;
   }
 
-  /**
-   * Gets cache statistics for testing in a map
-   */
+  /** Gets cache statistics for testing in a map */
   public Map<String, Long> getStats() {
     Map<String, Long> map = new HashMap<>();
     map.put("Hit", cache.stats().hitCount());
@@ -107,5 +105,4 @@ public class ACSCache implements ACSDataSource {
     map.put("Eviction", cache.stats().evictionCount());
     return map;
   }
-
 }

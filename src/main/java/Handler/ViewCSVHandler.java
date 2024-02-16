@@ -2,8 +2,6 @@ package Handler;
 
 import Handler.Serializer.FailureResponse;
 import Handler.Serializer.SuccessResponse;
-import com.squareup.moshi.JsonAdapter;
-import com.squareup.moshi.Moshi;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +60,4 @@ public class ViewCSVHandler implements Route {
       return new FailureResponse("error_bad_json", responseMap).serialize();
     }
   }
-
-
 }

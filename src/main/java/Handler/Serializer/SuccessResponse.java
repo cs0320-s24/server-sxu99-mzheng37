@@ -21,7 +21,6 @@ public record SuccessResponse(String responseType, Map<String, Object> data) {
     this("success", responseMap);
   }
 
-
   /**
    * Function to serialize the success response for the end-user to view
    *

@@ -10,21 +10,20 @@ import com.squareup.moshi.Moshi;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.time.LocalDate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import okio.Buffer;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testng.annotations.BeforeClass;
 import spark.Spark;
 
 public class ACSCacheUnitTest {
   ACSCache cache;
   ACSCache cache2;
 
-  @BeforeAll
+  @BeforeClass
   public static void setup_before_everything() {
     Spark.port(0);
     Logger.getLogger("").setLevel(Level.WARNING);
@@ -107,7 +106,7 @@ public class ACSCacheUnitTest {
             .fromJson(new Buffer().readFrom(clientConnection.getInputStream()));
     assertEquals(5, cache.getStats().get("Load"));
     assertEquals(5, cache.getStats().get("Miss"));
-    assertEquals(2, cache.getStats().get("Eviction") );
+    assertEquals(2, cache.getStats().get("Eviction"));
 
     // should find Scott county since it should not be evicted yet,
     // and load and miss should remain the same since it is a hit
@@ -120,20 +119,19 @@ public class ACSCacheUnitTest {
     assertEquals(5, cache.getStats().get("Load"));
     assertEquals(5, cache.getStats().get("Miss"));
 
-
     clientConnection.disconnect();
   }
 
   /**
    * Test continuous calls to broad band with interactions of loading, miss, evictions when full,
-   * and hit counts when entry found.
-   * This one tests time evictions too
+   * and hit counts when entry found. This one tests time evictions too
    *
    * @throws IOException if
    */
   @Test
   public void testCacheInteractionsTwo() throws IOException {
-    HttpURLConnection clientConnection = tryRequest("broadband?state=California&county=San%20Francisco");
+    HttpURLConnection clientConnection =
+        tryRequest("broadband?state=California&county=San%20Francisco");
     assertEquals(200, clientConnection.getResponseCode());
     Moshi moshi = new Moshi.Builder().build();
     SuccessResponse response =
@@ -204,8 +202,4 @@ public class ACSCacheUnitTest {
 
     clientConnection.disconnect();
   }
-
-
 }
-
-
