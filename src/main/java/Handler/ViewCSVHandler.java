@@ -4,6 +4,7 @@ import Handler.Serializer.FailureResponse;
 import Handler.Serializer.SuccessResponse;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -38,8 +39,7 @@ public class ViewCSVHandler implements Route {
    */
   @Override
   public Object handle(Request request, Response response) {
-    HashMap<String, Object> responseMap = new HashMap<>();
-
+    Map<String, Object> responseMap = new HashMap<>();
     // check that file has been loaded
     try {
       if (loadedFileName == null || loadedFileName.isEmpty()) {

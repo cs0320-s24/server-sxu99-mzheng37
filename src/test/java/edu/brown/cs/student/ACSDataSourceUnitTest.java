@@ -11,6 +11,7 @@ import DataSource.DatasourceException.DataSourceException;
 import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
+/** Test methods to access the US census API (methods in ACSDataSource) */
 public class ACSDataSourceUnitTest {
   ACSData dataSource = new ACSData();
 
