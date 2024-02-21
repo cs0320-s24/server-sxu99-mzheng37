@@ -19,9 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.testng.annotations.BeforeClass;
 import spark.Spark;
 
-/**
- * Test ACS Cache functions
- */
+/** Test ACS Cache functions */
 public class ACSCacheUnitTest {
   ACSCache cache;
   ACSCache cache2;
